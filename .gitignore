@@ -1,0 +1,16 @@
+
+#input_data
+data
+data/*
+
+#output_data
+results
+results/*
+
+#moments_models
+moments_models
+
+#DS_Store
+.DS_Store
+*/.DS_Store
+*/*/.DS_Store
