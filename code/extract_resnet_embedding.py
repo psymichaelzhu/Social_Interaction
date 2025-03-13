@@ -109,7 +109,7 @@ def process_video_folder(video_dir, model_type='resnet3d50'):
 if __name__ == "__main__":
     # Configuration
     VIDEO_DIR = '../../data/MiT_original_videos'
-    MODEL_TYPES = ['resnet3d50', 'resnet50', 'multi_resnet3d50']
+    MODEL_TYPES = ['resnet3d50', 'multi_resnet3d50']
     SAVE_PATH = '../../data/embedding/resnet_for_rsm.npy'
     
     # Check if the file exists and load if it does

@@ -56,11 +56,11 @@ def correlate_two_rsms(rsm1, rsm2, n_permutation=1000, if_display=True):
         
     return observed_r, p_value
 
-def correlate_two_dicts(rsm_dict1, rsm_dict2, n_permutation=1000, multiple_comparison='fdr_bh'):
+def correlate_two_dicts(reference_dict, candidate_dict_dict, n_permutation=1000, multiple_comparison='fdr_bh'):
     """Compute correlations between all pairs of RSMs from two dictionaries
     Args:
-        rsm_dict1 (dict): First dictionary with RSM names as keys and RSMs as values
-        rsm_dict2 (dict): Second dictionary with RSM names as keys and RSMs as values
+        reference_dict (dict): First dictionary with RSM names as keys and RSMs as values
+        candidate_dict_dict (dict): Dictionary of dictionaries, where each inner dictionary contains RSM names as keys and RSMs as values
         n_permutation (int): Number of permutations for null distribution
         multiple_comparison (str): Multiple comparison correction method ('fdr_bh' or 'bonferroni')
     Returns:
@@ -69,17 +69,20 @@ def correlate_two_dicts(rsm_dict1, rsm_dict2, n_permutation=1000, multiple_compa
     # Initialize lists to store results
     results = []
     
-    # Compute correlations for all pairs
-    for key1, rsm1 in rsm_dict1.items():
-        for key2, rsm2 in rsm_dict2.items():
-            print(key1,"-",key2)
-            r, p = correlate_two_rsms(rsm1, rsm2, n_permutation=n_permutation, if_display=False)
-            results.append({
-                'dict1': key1,
-                'dict2': key2,
-                'r': r,
-                'p': p
-            })
+    # Iterate through each module in candidate_dict_dict
+    for module, candidate_dict in candidate_dict_dict.items():
+        # Compute correlations for all pairs within this module
+        for key1, rsm1 in reference_dict.items():
+            for key2, rsm2 in candidate_dict.items():
+                #print(f"{key1} - {module}_{key2}")
+                r, p = correlate_two_rsms(rsm1, rsm2, n_permutation=n_permutation, if_display=False)
+                results.append({
+                    'reference': key1,
+                    'candidate': key2,
+                    'module': module,
+                    'r': r,
+                    'p': p
+                })
     
     # Convert to DataFrame
     df = pd.DataFrame(results)
@@ -103,20 +106,55 @@ def correlate_two_dicts(rsm_dict1, rsm_dict2, n_permutation=1000, multiple_compa
     
     return df
 
-def plot_correlation_matrix(correlation_df, figsize=(10,10)):
+def plot_correlation_matrix(correlation_df, candidate_name = "Candidate RDM", reference_name = "Neural RDM (ROI)", figsize=(10,10)):
     """Plot correlation matrix with significance markers
     Args:
         correlation_df (pd.DataFrame): DataFrame from correlate_two_dicts
         figsize (tuple): Figure size
     """
-    # Pivot the data into a matrix form
-    matrix = correlation_df.pivot(index='dict1', columns='dict2', values='r')
-    sig_matrix = correlation_df.pivot(index='dict1', columns='dict2', values='sig_sign')
+    def pivot_correlation_df(correlation_df, value_col):
+        """Create pivot tables for correlation values and significance markers, with columns grouped by module
+        """
+
+        sorted_df = correlation_df.sort_values('module')
+        
+        ordered_refs = np.sort(sorted_df['reference'].unique())
+        ordered_cands = sorted_df['candidate'].unique()
+        
+        matrix = sorted_df.pivot(
+            index='reference',
+            columns='candidate',
+            values=value_col
+        )
+        
+        matrix = matrix.reindex(columns=ordered_cands)
+        matrix = matrix.reindex(index=ordered_refs)
+        
+        return matrix
+    
+    matrix = pivot_correlation_df(correlation_df, 'r')
+    sig_matrix = pivot_correlation_df(correlation_df, 'sig_sign')
     
     plt.figure(figsize=figsize)
     scale_length=0.5
+    
+    # Get module boundaries
+    modules = correlation_df['module'].unique()
+    module_boundaries = []
+    current_pos = 0
+    for module in modules:
+        module_cols = correlation_df[correlation_df['module'] == module]['candidate'].nunique()
+        current_pos += module_cols
+        if current_pos < len(matrix.columns):  
+            module_boundaries.append(current_pos)
+    
+    # Plot heatmap
     sns.heatmap(matrix, cmap='RdBu_r', center=0, vmin=-scale_length, vmax=scale_length,
                 annot=False, fmt='.2f', cbar_kws={'label': 'Correlation'})
+    
+    # Add white lines between modules
+    for boundary in module_boundaries:
+        plt.axvline(x=boundary, color='white', linewidth=2)
     
     # Add significance markers
     for i in range(len(matrix.index)):
@@ -127,8 +165,8 @@ def plot_correlation_matrix(correlation_df, figsize=(10,10)):
                         fontsize=12)
     
     plt.title('RSM Correlations', fontsize=22)
-    plt.xlabel('Dict 2', fontsize=18)
-    plt.ylabel('Dict 1', fontsize=18)
+    plt.xlabel(candidate_name, fontsize=18)
+    plt.ylabel(reference_name, fontsize=18)
     plt.xticks(fontsize=18, rotation=90)
     plt.yticks(fontsize=18, rotation=0)
     
@@ -166,20 +204,14 @@ for sub in roi_neural_rsm.keys():
 model_rsm=np.load('../data/RSA/model_rsm.npy',allow_pickle=True).item()
 model_rsm.keys()
 
-
 #%% load CLIP RSM
 clip_rsm=np.load('../data/RSA/clip_rsm.npy',allow_pickle=True).item()
 clip_rsm.keys()
 
 #%% correlate CLIP RSM with reorganized neural RSM for each subject/group
 # Correlate each level with CLIP RSM and store results
-# List of RSMs to combine
-rsm_list = [clip_rsm, model_rsm]
-
 # Combine all RSMs into one dictionary
-combined_rsm = {}
-for rsm in rsm_list:
-    combined_rsm.update(rsm)
+combined_rsm = {"CLIP_annotation":clip_rsm, "model_embedding":model_rsm}
 
 # Correlate combined RSM with neural RSM for each subject/group
 corr_dfs = {}
