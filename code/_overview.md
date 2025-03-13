@@ -225,38 +225,55 @@ visual
 Question: Which dimension is represented by brain?
 Model (semantic) representation vs. neural  representation
 
-0. video preparation (matching)
-1. video embedding vector
+0. video preparation (matching)√ [match_videos.py]
+1. video embedding vector√ [extract_video_embedding_CLIP.ipynb]
     videos
-        validate: 1) within vs. between 2) dimension reduction
-    video_embedding_df
-2. conditional annotation of video 
-    concept, video_embedding_df
-        dimension_list; multiple: softmax
-    video_annotation_df
-3. neural data
+    embedding_df: CLIP_video 
+         validate: within vs. between √ 
+         description: 1) distribution √ 2) clustering √ [clustering_CLIP_embedding.ipynb]
+2. neural data
     check, organize
     neural activity -mask -summarize by roi
-4. construct rsm:
+        which level
+    more RoI? **whole-brain**
+    specific RoI
+
+3. construct rsm:
     df
     rsm
         multiple: organize
     rsms (previous: neural, rating, CLIP overall, visual)
+
+4. RSA: neural, CLIP, ResNet
+    CLIP is better than ResNet
+    not satisfying, multiple dimensions--need clear separation
+
+    statistical test
+
+4. conditional annotation of video (dimensional)
+    concept, video_embedding_df
+        dimension_list; multiple: softmax
+    video_annotation_df
+    validate:
+        example | distribution, extreme
+        human rating correlation
+
 5. compare video annotation with neural
     word, neural level
         word-video_annotation-video_annotation_df-video_annotation_rsm
         correlate with neural_rsm
     correlation coefficient (optimization goal)
+
 6. go through design space
     define design space
-        discrete (from theory, LLM)
-        continuous embedding space
+        **discrete (from theory, LLM)**
+        continuous embedding space, active learning
     for each word, run this 
         landscape
         summit
 
 potential results
-Region decodes ....
+Region decodes .... (validate & discovery)
 
 
 
@@ -267,3 +284,128 @@ TODO
 2. read papers
     design space (concept list)
     
+mapping
+
+
+frame embedding --> video embedding --> video unipolar annotation (cos) --> video structure (bi- or multi- polar) annotation(classification standarize)-->video dimension vector
+
+
+neural RSM - semantic dimension RSM
+which dimension is this area representing?
+optimization problem
+
+
+
+
+
+
+
+
+
+design space
+how to choose dimension?
+    active learning in embedding space:
+        constrain: high-level (discrete), distance to social interaction (boundary)
+    landscape
+
+
+
+network的形状
+semantic的map
+
+在其中游走
+发现新的
+
+
+frame embedding √ --> video embedding √--> video unipolar annotation (cos) √ --> video structure (bi- or multi- polar) annotation ƒ(classification standarize)-->video dimension vector √ (df) |multiple
+
+hierarchical semantic structure (dict)
+-->
+all the semantic df√ [dimensional_CLIP_annotation.ipynb]
+
+
+
+neural df
+    check
+    searchlight RSM [TODO]
+
+1. 使用对齐的 --> TPJ STS EVC
+2. 写基础的RSM
+3. searchlight RSM
+
+
+函数建构RSM
+
+
+函数for annotation RSM
+
+对比
+显著性检验
+
+新的维度：文献 综合
+
+对比的文献
+理论文献
+
+---
+RSM [TODO]
+    df -> RSM
+    semantic    
+    neural RSM
+test
+
+RSA: neural (RoI) --> neural RSM [TODO]
+
+neural RSM - semantic dimension RSM
+which dimension is this area representing?
+optimization problem
+
+
+design space
+how to choose dimension?
+    active learning in embedding space:
+        constrain: high-level (discrete), distance to social interaction (boundary)
+    landscape
+
+理论
+
+
+
+
+how:
+achtype: dimensional
+where:
+embedding hierarchical clustering....
+
+简单的维度 (聚类)
+
+文章
+
+LLM
+
+
+
+
+请列出所有与 "social interaction" 相关的概念，并根据其层次关系归类。
+例如：
+- 关系 (relationship): 亲子关系、朋友关系、权力关系
+- 情感 (emotion): 亲密、信任、害怕、愤怒
+- 交流 (communication): 语言交流、非语言交流、书面交流
+- 场景 (scene): 工作场合、家庭环境、公共场所
+
+扩展?
+
+
+
+调研
+合并
+
+设计子维度
+
+检查
+根据相关情况
+合并
+
+找到最佳维度
+
+解释: 相关
