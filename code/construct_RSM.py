@@ -233,9 +233,15 @@ if not os.path.exists('../data/RSA/neural_rsm.npy'):
 
 #%% model rsm
 #load model embedding
+#clip
 clip_embedding=pd.read_csv('../data/embedding/CLIP_video.csv')
-clip_embedding.head()
-model_for_rsm={"CLIP":clip_embedding}
+print(clip_embedding.head())
+
+resnet_embedding_dict=np.load('../data/embedding/resnet_for_rsm.npy',allow_pickle=True).item()
+model_for_rsm = {**resnet_embedding_dict, **{"CLIP":clip_embedding}}
+print(model_for_rsm.keys())
+
+#%%
 #save model_for_rsm
 if not os.path.exists('../data/embedding'):
     os.makedirs('../data/embedding')
@@ -263,5 +269,8 @@ if not os.path.exists('../data/RSA'):
     os.makedirs('../data/RSA')
 np.save('../data/RSA/clip_rsm.npy', clip_rsm)
 print(clip_rsm.keys())
+
+
+
 
 # %%
