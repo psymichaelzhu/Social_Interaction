@@ -383,7 +383,7 @@ annotation_results = annotate_all_dimensions(dimension_dict, video_embedding_df)
 print(annotation_results['body_orientation'].head())
 np.save('../data/embedding/CLIP_for_rsm.npy', annotation_results)
 # %%
-target_dimension = 'scene'
+target_dimension = 'dance'
 visualize_annotation_distributions(annotation_results[target_dimension])
 for instance in dimension_dict[target_dimension]:
     show_extreme_videos(annotation_results[target_dimension], instance)

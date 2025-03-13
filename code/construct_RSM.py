@@ -194,44 +194,47 @@ if False:
 # %% load neural data
 neural_for_rsm=np.load('../data/neural/neural_for_rsm.npy',allow_pickle=True).item()
 neural_for_rsm
-# %% compute all neural roi rsms
-# Compute RSMs for subjects 01-04
-subject_rsms = {}
-for sub in ['01', '02', '03', '04']:
-    print(f'computing rsm for subject {sub}')
-    subject_rsms[sub] = compute_dict_rsm(neural_for_rsm[sub], 
-                                       video_name_list=video_name_list,
-                                       similarity_metric='pearson')
+# %% compute all neural rsms
+if os.path.exists('../data/RSA/neural_rsm.npy'):
+    print('neural rsm already exists, loading...')
+    all_neural_rsms=np.load('../data/RSA/neural_rsm.npy',allow_pickle=True).item()
+else:
+    # Compute RSMs for subjects 01-04
+    subject_rsms = {}
+    for sub in ['01', '02', '03', '04']:
+        print(f'computing rsm for subject {sub}')
+        subject_rsms[sub] = compute_dict_rsm(neural_for_rsm[sub], 
+                                        video_name_list=video_name_list,
+                                        similarity_metric='pearson')
 
-#%% group neural RSM
-group_rsm = {}
-for roi in subject_rsms['01'].keys():
-    group_rsm[roi] = {}
-    for side in subject_rsms['01'][roi].keys():
-        # Get RSMs from all subjects for this ROI and side
-        rsms = [subject_rsms[sub][roi][side] for sub in ['01', '02', '03', '04']]
-        
-        # Fisher Z transform, then average, then convert back to correlation
-        z_rsms = [np.arctanh(rsm) for rsm in rsms]
-        mean_z = np.mean(z_rsms, axis=0)
-        group_rsm[roi][side] = np.tanh(mean_z)
+    # group neural RSM
+    group_rsm = {}
+    for roi in subject_rsms['01'].keys():
+        group_rsm[roi] = {}
+        for side in subject_rsms['01'][roi].keys():
+            # Get RSMs from all subjects for this ROI and side
+            rsms = [subject_rsms[sub][roi][side] for sub in ['01', '02', '03', '04']]
+            
+            # Fisher Z transform, then average, then convert back to correlation
+            z_rsms = [np.arctanh(rsm) for rsm in rsms]
+            mean_z = np.mean(z_rsms, axis=0)
+            group_rsm[roi][side] = np.tanh(mean_z)
 
-#%% Combine all neural RSMs into final dictionary
-all_neural_rsms = {
-    'group': group_rsm,
-    'sub01': subject_rsms['01'],
-    'sub02': subject_rsms['02'], 
-    'sub03': subject_rsms['03'],
-    'sub04': subject_rsms['04']
-}
+    # Combine all neural RSMs into final dictionary
+    all_neural_rsms = {
+        'group': group_rsm,
+        'sub01': subject_rsms['01'],
+        'sub02': subject_rsms['02'], 
+        'sub03': subject_rsms['03'],
+        'sub04': subject_rsms['04']
+    }
 
-#%% save all neural RSMs
-if not os.path.exists('../data/RSA'):
-    os.makedirs('../data/RSA')
-if not os.path.exists('../data/RSA/neural_rsm.npy'):
+    # Save all neural RSMs
+    if not os.path.exists('../data/RSA'):
+        os.makedirs('../data/RSA')
     np.save('../data/RSA/neural_rsm.npy', all_neural_rsms)
-
-#%% model rsm
+all_neural_rsms
+#%% model embedding rsm
 #load model embedding
 #clip
 clip_embedding=pd.read_csv('../data/embedding/CLIP_video.csv')
@@ -241,30 +244,29 @@ resnet_embedding_dict=np.load('../data/embedding/resnet_for_rsm.npy',allow_pickl
 model_for_rsm = {**resnet_embedding_dict, **{"CLIP":clip_embedding}}
 print(model_for_rsm.keys())
 
-#%%
-#save model_for_rsm
+# save model_for_rsm
 if not os.path.exists('../data/embedding'):
     os.makedirs('../data/embedding')
 np.save('../data/embedding/model_for_rsm.npy', model_for_rsm)
 
-#RSM for model
+# RSM for model
 model_rsm={}
 model_rsm=compute_dict_rsm(model_for_rsm, video_name_list=video_name_list, similarity_metric='euclidean')
 
-#save model_rsm
+# save model_rsm
 if not os.path.exists('../data/RSA'):
     os.makedirs('../data/RSA')
 np.save('../data/RSA/model_rsm.npy', model_rsm)
 
 
-#%% load CLIP data
+#%% CLIP annotation rsm
 clip_for_rsm=np.load('../data/embedding/CLIP_for_rsm.npy',allow_pickle=True).item()
 clip_for_rsm
 
-#%% compute CLIP RSM
+# compute CLIP RSM
 clip_rsm=compute_dict_rsm(clip_for_rsm, video_name_list=video_name_list, similarity_metric='euclidean')
 
-#%% save CLIP RSM
+# save CLIP RSM
 if not os.path.exists('../data/RSA'):
     os.makedirs('../data/RSA')
 np.save('../data/RSA/clip_rsm.npy', clip_rsm)
