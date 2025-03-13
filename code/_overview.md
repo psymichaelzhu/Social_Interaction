@@ -399,49 +399,106 @@ LLM
 
 
 
-0 热图
-固定顺序
-title 
-
-
-
-
-3 更多CLIP
+3 更多CLIP 50
     编号
     dim
+rating
+    self: 对比DL
+    neural: DNN强大
+    整理-回归
+
+2 自动发掘 基于embedding
+    调研
+    合并
+
+    设计子维度
+
+    检查
+    根据相关情况
+    合并
+
+    找到最佳维度
+
+    解释: 相关
+
+重要
 
 
-对比
-
-4直接对比模型
-    rating 相关
-    聚类
-模型和神经
-
-2 回归:stats
 
 
+新的CLIP
+rating
+几个维度 直接操作
+
+写作
+    先交一个link
 
 
 
-1自动发掘 基于embedding
-调研
-合并
 
-设计子维度
+---
 
+写作
 
-
-检查
-根据相关情况
-合并
-
-找到最佳维度
-
-解释: 相关
+先比CLIP和其他 找到优势模型
+再来可解释性
+open-window
+可解释性 特异性
 
 
-可解释性
-特异性
 
+
+写一个函数
+input: 
+1. roi (roi_side的形式)
+2. candidate_list (字典，表明了每个module里选哪些rsm)
+3. candidate_rsm_dict (dict_dict 比如combined_rsm)
+4. neural_rsm
+
+从neural_rsm里提取subject在这个roi_side的rsm
+再从candidate_rsm_dict中提取相应的
+
+然后提取下三角
+
+神经的做rank处理，特征的不处理
+
+合并为df
+
+sub video1 video2 roi feature1 feature2 ...
+
+返回df
+
+
+第二个函数
+input：上面那个df
+基于刚才这个df 建立回归模型
+打印不同feature的回归系数
+如果if_display
+则展示不同feature的coefficient，从大到小(不包括intercept)
+返回dict {roi: {intercept: intercept, feature1: beta1, feature2: beta2}}
+
+
+    lmm 检查
+    颜色  选择维度 颜色
+    整合绘图
+
+    consistency: rank; cross data
+    mixed model
+    bonferroni
+
+    提mixed effect
+    可视化
+
+
+
+
+第二个函数
+input: average_df 根据这里面的r 挑选那些r在0.2以上的roi-candidate组合
+对于每一个roi, 都选择其所有的candidate
+然后调用上面那个函数获得其回归系数
+然后汇总所有roi的
+返回dict
+    汇总的显示形式
+    统一的一组
+    CLIP annotation + resnet50
 
